@@ -524,10 +524,12 @@ The following mappings can all be customized via the setup function.
                                                              *:NeogitResetState*
 :NeogitResetState       Performs a full reset of saved flags for all popups.
 
-                                                                    *:NeogitLog*
-:NeogitLog              Opens log buffer for any changes to the current file,
-                        or a path the user has specified. Optionally, a range
-                        can be specified to further filter the log entries.
+                                                             *:NeogitLogCurrent*
+:NeogitLogCurrent       Opens a log buffer listing the commits that touched the
+                        current file, or a path the user has specified. A
+                        range can be specified to only list commits touching
+                        the selected lines. Opening a commit shows its diff
+                        filtered to that file.
 
                                                                  *:NeogitCommit*
 :NeogitCommit           Opens the commit view for the specified SHA, or `HEAD`

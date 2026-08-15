@@ -2,6 +2,7 @@ local M = {}
 
 local git = require("neogit.lib.git")
 local util = require("neogit.lib.util")
+local notification = require("neogit.lib.notification")
 
 local LogViewBuffer = require("neogit.buffers.log_view")
 local ReflogViewBuffer = require("neogit.buffers.reflog_view")
@@ -169,6 +170,38 @@ function M.limit_to_files()
   end
 
   return a.wrap(fn, 2)
+end
+
+---Opens a log view scoped to a single file (or a line range within it). The
+---list shows commits only; opening/peeking a commit shows its diff filtered to
+---the file.
+---@param path string repo-relative path
+---@param l1? integer first line of the selection
+---@param l2? integer last line of the selection
+function M.open_file(path, l1, l2)
+  local options = {}
+  local log_files = {}
+
+  local header
+  if l1 and l2 then
+    table.insert(options, string.format("-L%d,%d:%s", l1, l2, path))
+    header = string.format("History of %s:%d-%d", path, l1, l2)
+  else
+    log_files = { path }
+    header = "History of " .. path
+  end
+
+  local commits = git.log.list(options, nil, log_files, false, false)
+  if vim.tbl_isempty(commits) then
+    notification.info("No history found for " .. path)
+    return
+  end
+
+  local fetch_more = function(offset)
+    return git.log.list(util.merge(options, { ("--skip=%s"):format(offset) }), nil, log_files, false, false)
+  end
+
+  LogViewBuffer.new(commits, { decorate = true }, { path }, fetch_more, header, git.remote.list()):open()
 end
 
 return M
