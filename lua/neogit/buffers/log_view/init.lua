@@ -195,7 +195,23 @@ function M:open()
         ["+"] = a.void(function()
           local permit = self.refresh_lock:acquire()
 
-          self.commits = util.merge(self.commits, self.fetch_func(self:commit_count()))
+          local seen = {}
+          for _, commit in ipairs(self.commits) do
+            if commit.oid then
+              seen[commit.oid] = true
+            end
+          end
+
+          local more = self.fetch_func(self:commit_count())
+          for _, commit in ipairs(more) do
+            if not commit.oid or not seen[commit.oid] then
+              table.insert(self.commits, commit)
+              if commit.oid then
+                seen[commit.oid] = true
+              end
+            end
+          end
+
           self.buffer.ui:render(unpack(ui.View(self.commits, self.remotes, self.internal_args)))
 
           permit:forget()
