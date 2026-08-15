@@ -392,4 +392,76 @@ M.Grid = Component.new(function(props)
   return col(rendered)
 end)
 
+---Returns the commit-related popup mappings shared by the list-style buffers
+---(log view, reflog view). `self` must expose `buffer.ui` with the commit
+---selection helpers.
+---@param self table buffer instance
+---@param kind "v"|"n"
+---@return table<string, function>
+function M.commit_popup_mappings(self, kind)
+  local popups = require("neogit.popups")
+
+  local function get_commit()
+    return self.buffer.ui:get_commit_under_cursor()
+  end
+
+  local function get_commits()
+    if kind == "v" then
+      return self.buffer.ui:get_commits_in_selection()
+    end
+
+    return { self.buffer.ui:get_commit_under_cursor() }
+  end
+
+  local function get_ordered_commits()
+    if kind == "v" then
+      return self.buffer.ui:get_ordered_commits_in_selection()
+    end
+
+    return self.buffer.ui:get_commit_under_cursor()
+  end
+
+  return {
+    [popups.mapping_for("CherryPickPopup")] = popups.open("cherry_pick", function(p)
+      p { commits = get_commits() }
+    end),
+    [popups.mapping_for("BranchPopup")] = popups.open("branch", function(p)
+      p { commits = get_commits() }
+    end),
+    [popups.mapping_for("BisectPopup")] = popups.open("bisect", function(p)
+      p { commits = get_commits() }
+    end),
+    [popups.mapping_for("RevertPopup")] = popups.open("revert", function(p)
+      p { commits = get_commits() }
+    end),
+    [popups.mapping_for("CommitPopup")] = popups.open("commit", function(p)
+      p { commit = get_commit() }
+    end),
+    [popups.mapping_for("MergePopup")] = popups.open("merge", function(p)
+      p { commit = get_commit() }
+    end),
+    [popups.mapping_for("PushPopup")] = popups.open("push", function(p)
+      p { commit = get_commit() }
+    end),
+    [popups.mapping_for("RebasePopup")] = popups.open("rebase", function(p)
+      p { commit = get_commit() }
+    end),
+    [popups.mapping_for("ResetPopup")] = popups.open("reset", function(p)
+      p { commit = get_commit() }
+    end),
+    [popups.mapping_for("TagPopup")] = popups.open("tag", function(p)
+      p { commit = get_commit() }
+    end),
+    [popups.mapping_for("FetchPopup")] = popups.open("fetch"),
+    [popups.mapping_for("PullPopup")] = popups.open("pull"),
+    [popups.mapping_for("RemotePopup")] = popups.open("remote"),
+    [popups.mapping_for("DiffPopup")] = popups.open("diff", function(p)
+      p {
+        section = { name = "log" },
+        item = { name = get_ordered_commits() },
+      }
+    end),
+  }
+end
+
 return M
