@@ -355,6 +355,8 @@ function M:goto_commit(oid)
   else
     CommitViewBuffer.new(oid, self.files):open()
   end
+
+  self.buffer:refresh_active_item_highlight()
 end
 
 ---Moves to the next commit relative to the commit currently shown in the commit view.

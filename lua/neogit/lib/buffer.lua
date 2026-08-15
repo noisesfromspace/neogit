@@ -544,6 +544,27 @@ function Buffer:clear_namespace(name)
   end
 end
 
+---Refreshes the "active item" highlight to match the commit currently shown in
+---the commit view. Clears unconditionally so it also works when this buffer is
+---not the focused window (e.g. navigating from the commit view).
+function Buffer:refresh_active_item_highlight()
+  local ns_id = self:get_namespace_id("ActiveItem")
+  if ns_id then
+    api.nvim_buf_clear_namespace(self.handle, ns_id, 0, -1)
+  end
+
+  local active_oid = require("neogit.buffers.commit_view").current_oid()
+  local item = self.ui:find_component_by_oid(active_oid)
+  if item and item.first and item.last then
+    for line = item.first, item.last do
+      self:add_line_highlight(line - 1, "NeogitActiveItem", {
+        priority = 200,
+        namespace = "ActiveItem",
+      })
+    end
+  end
+end
+
 function Buffer:create_namespace(name)
   assert(name, "Namespace must have a name")
 
@@ -956,18 +977,7 @@ function Buffer.create(config)
         return buffer:exists() and buffer:is_valid()
       end,
       on_win = function()
-        buffer:clear_namespace("ActiveItem")
-
-        local active_oid = require("neogit.buffers.commit_view").current_oid()
-        local item = buffer.ui:find_component_by_oid(active_oid)
-        if item and item.first and item.last then
-          for line = item.first, item.last do
-            buffer:add_line_highlight(line - 1, "NeogitActiveItem", {
-              priority = 200,
-              namespace = "ActiveItem",
-            })
-          end
-        end
+        buffer:refresh_active_item_highlight()
       end,
     })
 
