@@ -30,15 +30,7 @@ end
 ---@return T[]
 --- Flattens one level of lists
 function M.flatten(tbl)
-  local t = {}
-
-  for _, v in ipairs(tbl) do
-    for _, v in ipairs(v) do
-      table.insert(t, v)
-    end
-  end
-
-  return t
+  return vim.iter(tbl):flatten():totable()
 end
 
 ---@generic T: any
@@ -47,7 +39,7 @@ end
 ---@param f fun(v: T): U
 ---@return U[]
 function M.flat_map(tbl, f)
-  return M.flatten(M.map(tbl, f))
+  return vim.iter(tbl):map(f):flatten():totable()
 end
 
 ---@generic T: any
@@ -55,14 +47,7 @@ end
 ---@return T[]
 --- Reverses list-like table
 function M.reverse(tbl)
-  local t = {}
-  local c = #tbl + 1
-
-  for i, v in ipairs(tbl) do
-    t[c - i] = v
-  end
-
-  return t
+  return vim.iter(tbl):rev():totable()
 end
 
 ---@generic T: any
@@ -71,14 +56,13 @@ end
 ---@param f fun(v: T): U|nil
 ---@return U[]
 function M.filter_map(list, f)
-  local t = {}
-  for _, v in ipairs(list) do
-    v = f(v)
-    if v ~= nil then
-      table.insert(t, v)
-    end
-  end
-  return t
+  return vim
+    .iter(list)
+    :map(f)
+    :filter(function(v)
+      return v ~= nil
+    end)
+    :totable()
 end
 
 ---@param value number
@@ -150,7 +134,7 @@ function M.intersperse(tbl, sep)
 end
 
 function M.filter(tbl, f)
-  return vim.tbl_filter(f, tbl)
+  return vim.iter(tbl):filter(f):totable()
 end
 
 ---Finds length of longest string in table
@@ -345,13 +329,12 @@ end
 ---@param tbl table
 ---@return table
 function M.compact(tbl)
-  local res = {}
-  for i = 1, #tbl do
-    if tbl[i] ~= nil then
-      table.insert(res, tbl[i])
-    end
-  end
-  return res
+  return vim
+    .iter(tbl)
+    :filter(function(v)
+      return v ~= nil
+    end)
+    :totable()
 end
 
 function M.find(tbl, cond)
