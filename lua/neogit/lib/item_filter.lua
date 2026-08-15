@@ -1,9 +1,3 @@
-local Collection = require("neogit.lib.collection")
-
----@class ItemFilter
----@field new fun(table): ItemFilter
----@field create fun(table): ItemFilter
----@field accepts fun(self, string, string): boolean
 local ItemFilter = {}
 ItemFilter.__index = ItemFilter
 
@@ -15,12 +9,12 @@ end
 ---@param items string[]
 ---@return ItemFilter
 function ItemFilter.create(items)
-  return ItemFilter.new(Collection.new(items):map(function(item)
+  return ItemFilter.new(vim.tbl_map(function(item)
     local section, file = item:match("^([^:]+):(.*)$")
     assert(section, "Invalid filter item: " .. item)
 
     return { section = section, file = file }
-  end))
+  end, items))
 end
 
 ---@param section string
