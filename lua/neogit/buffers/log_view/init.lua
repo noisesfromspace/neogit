@@ -326,4 +326,61 @@ function M:open()
   }
 end
 
+---@return string[] ordered list of commit oids
+function M:commit_list()
+  local oids = {}
+  for _, commit in ipairs(self.commits) do
+    if commit.oid then
+      table.insert(oids, commit.oid)
+    end
+  end
+
+  return oids
+end
+
+---Moves the log view cursor to the given commit and shows it in the commit view.
+---@param oid string
+function M:goto_commit(oid)
+  local item = self.buffer.ui:find_component_by_oid(oid)
+  if not item then
+    return
+  end
+
+  self.buffer:win_call(function()
+    vim.api.nvim_win_set_cursor(0, { item.first, 0 })
+  end)
+
+  if CommitViewBuffer.is_open() then
+    CommitViewBuffer.instance:update(oid, self.files)
+  else
+    CommitViewBuffer.new(oid, self.files):open()
+  end
+end
+
+---Moves to the next commit relative to the commit currently shown in the commit view.
+function M:move_to_next_commit()
+  self:move_to_commit(1)
+end
+
+---Moves to the previous commit relative to the commit currently shown in the commit view.
+function M:move_to_prev_commit()
+  self:move_to_commit(-1)
+end
+
+---@param direction integer 1 for next, -1 for previous
+function M:move_to_commit(direction)
+  local oids = self:commit_list()
+  local current = CommitViewBuffer.current_oid()
+
+  for i, oid in ipairs(oids) do
+    if oid == current then
+      local next_oid = oids[i + direction]
+      if next_oid then
+        self:goto_commit(next_oid)
+      end
+      return
+    end
+  end
+end
+
 return M

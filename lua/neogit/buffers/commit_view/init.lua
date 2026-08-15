@@ -371,6 +371,18 @@ function M:open(kind)
             vim.cmd("normal! zt")
           end
         end,
+        ["[c"] = function()
+          local log_view = require("neogit.buffers.log_view")
+          if log_view.instance then
+            log_view.instance:move_to_prev_commit()
+          end
+        end,
+        ["]c"] = function()
+          local log_view = require("neogit.buffers.log_view")
+          if log_view.instance then
+            log_view.instance:move_to_next_commit()
+          end
+        end,
         [popups.mapping_for("BisectPopup")] = popups.open("bisect", function(p)
           p { commits = { self.commit_info.oid } }
         end),
