@@ -19,7 +19,7 @@ local function parse_branches(branches, include_current)
   local ref = " %-> "
   local detached = "^%(HEAD detached at %x%x%x%x%x%x%x"
   local no_branch = "^%(no branch,"
-  local pattern = include_current and "^[* ] (.+)" or "^  (.+)"
+  local pattern = include_current and "^[*+ ] (.+)" or "^[+ ] (.+)"
 
   for _, b in ipairs(branches) do
     local branch_name = b:match(pattern)
