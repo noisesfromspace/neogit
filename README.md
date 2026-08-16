@@ -125,7 +125,7 @@ local neogit = require("neogit")
 
 neogit.setup {
   -- Use Treesitter to apply syntax highlighting to diff hunks
-  treesitter_diff_highlight = true,
+  treesitter_diff_highlight = false,
   -- Apply word-diff highlights to diff hunks
   word_diff_highlight = true,
   -- Hides the hints at the top of the status buffer
