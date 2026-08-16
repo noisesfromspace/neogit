@@ -17,9 +17,24 @@ function M.create()
     :option("n", "max-count", "256", "Limit number of commits", { default = "256", key_prefix = "-" })
     :option("A", "author", "", "Limit to author", { key_prefix = "-" })
     :option("F", "grep", "", "Search messages", { key_prefix = "-" })
-    :switch("G", "G", "Search changes", { user_input = true, cli_prefix = "-" })
-    :switch("S", "S", "Search occurrences", { user_input = true, cli_prefix = "-" })
-    :switch("L", "L", "Trace line evolution", { user_input = true, cli_prefix = "-" })
+    :switch(
+      "G",
+      "G",
+      "Search changes",
+      { user_input = true, cli_prefix = "-", incompatible = { "simplify-by-decoration" } }
+    )
+    :switch(
+      "S",
+      "S",
+      "Search occurrences",
+      { user_input = true, cli_prefix = "-", incompatible = { "simplify-by-decoration" } }
+    )
+    :switch(
+      "L",
+      "L",
+      "Trace line evolution",
+      { user_input = true, cli_prefix = "-", incompatible = { "simplify-by-decoration" } }
+    )
     :option("s", "since", "", "Limit to commits since", { key_prefix = "-" })
     :option("u", "until", "", "Limit to commits until", { key_prefix = "-" })
     :switch("m", "no-merges", "Omit merges", { key_prefix = "=" })
