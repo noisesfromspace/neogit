@@ -133,15 +133,6 @@ function M.prune_branches(_)
   notification.info("Pruned remote " .. selected_remote)
 end
 
--- https://github.com/magit/magit/blob/main/lisp/magit-remote.el#L159
--- All of something's refspecs are stale.  replace with [d]efault refspec, [r]emove remote, or [a]abort
--- function M.prune_refspecs()
--- end
-
--- https://github.com/magit/magit/blob/430a52c4b3f403ba8b0f97b4b67b868298dd60f3/lisp/magit-remote.el#L259
--- function M.update_default_branch()
--- end
-
 function M.unshallow(_)
   local remotes = git.remote.list()
   if #remotes == 0 then

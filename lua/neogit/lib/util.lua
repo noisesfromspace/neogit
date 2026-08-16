@@ -150,37 +150,6 @@ function M.max_length(tbl)
   return max
 end
 
--- function M.print_tbl(tbl)
---   for _, x in pairs(tbl) do
---     print("| " .. x)
---   end
--- end
-
--- function M.get_keymaps(mode, startswith)
---   local maps = vim.api.nvim_get_keymap(mode)
---   if startswith then
---     return M.filter(maps, function(x)
---       return vim.startswith(x.lhs, startswith)
---     end)
---   else
---     return maps
---   end
--- end
-
--- function M.time(name, f)
---   local before = os.clock()
---   local res = f()
---   print(name .. " took " .. os.clock() - before .. "ms")
---   return res
--- end
-
--- function M.time_async(name, f)
---   local before = os.clock()
---   local res = a.run(f())
---   print(name .. " took " .. os.clock() - before .. "ms")
---   return res
--- end
-
 ---@param opts table? If { mode = 'append' }, adds spaces to the end of `str`. If { mode = 'insert' }, adds spaces to the beginning.
 function M.str_min_width(str, len, sep, opts)
   local mode = (type(opts) == "table" and opts.mode) or "append"
@@ -217,31 +186,12 @@ function M.slice(tbl, s, e)
   return new
 end
 
--- function M.str_count(str, target)
---   local count = 0
---   local str_len = #str
---   for i = 1, str_len do
---     if str:sub(i, i) == target then
---       count = count + 1
---     end
---   end
---   return count
--- end
-
 function M.split(str, sep)
   if str == "" then
     return {}
   end
   return vim.split(str, sep)
 end
-
--- function M.split_lines(str)
---   if str == "" then
---     return {}
---   end
---   -- we need \r? to support windows
---   return vim.split(str, "\r?\n")
--- end
 
 function M.str_first_char(str)
   return vim.fn.strcharpart(str, 0, 1)

@@ -42,19 +42,6 @@ function M:open()
     active_item_highlight = true,
     mappings = {
       v = {
-        [popups.mapping_for("CherryPickPopup")] = function()
-          -- TODO: implement
-          -- local stash = self.buffer.ui:get_commit_under_cursor()[1]
-          -- if stash then
-          --   local stash_item = util.find(self.stashes, function(s)
-          --     return s.idx == tonumber(stash:match("stash@{(%d+)}"))
-          --   end)
-          --
-          --   if stash and input.get_permission("Pop stash " .. stash_item.name) then
-          --     git.stash.pop(stash)
-          --   end
-          -- end
-        end,
         [status_maps["Discard"]] = function()
           local stashes = self.buffer.ui:get_commits_in_selection()
           if stashes then

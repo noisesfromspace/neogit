@@ -87,12 +87,6 @@ function M:get_internal_arguments()
   return args
 end
 
--- Combines all cli arguments into a single string.
----@return string
-function M:to_cli()
-  return table.concat(self:get_arguments(), " ")
-end
-
 -- Closes the popup buffer
 function M:close()
   if self.buffer then
