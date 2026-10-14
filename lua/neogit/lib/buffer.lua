@@ -131,10 +131,6 @@ function Buffer:insert_line(line)
   api.nvim_buf_set_lines(self.handle, line_nr, line_nr, false, { line })
 end
 
-function Buffer:resize(length)
-  api.nvim_buf_set_lines(self.handle, length, -1, false, {})
-end
-
 function Buffer:set_highlights(highlights)
   for _, highlight in ipairs(highlights) do
     self:add_highlight(unpack(highlight))
@@ -533,10 +529,6 @@ end
 
 function Buffer:clear_namespace(name)
   assert(name, "Cannot clear namespace without specifying which")
-
-  if not self:is_focused() then
-    return
-  end
 
   local ns_id = self:get_namespace_id(name)
   if ns_id then
@@ -976,7 +968,11 @@ function Buffer.create(config)
       on_start = function()
         return buffer:exists() and buffer:is_valid()
       end,
-      on_win = function()
+      on_win = function(_, _, bufnr)
+        if bufnr ~= buffer.handle then
+          return false
+        end
+
         buffer:refresh_active_item_highlight()
       end,
     })
