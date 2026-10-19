@@ -42,6 +42,20 @@ function Buffer:new(handle, win_handle)
 
   this.ui = Ui.new(this)
 
+  -- The highlight namespace (see apply_hl_ns) is window state, so it outlives
+  -- this buffer: a window that showed neogit and then shows something else
+  -- keeps it and would paint that buffer with neogit's overrides. Deferred,
+  -- because while BufWinLeave runs the window still displays this buffer.
+  api.nvim_create_autocmd("BufWinLeave", {
+    buffer = handle,
+    group = this.autocmd_group,
+    callback = function()
+      vim.schedule(function()
+        this:release_hl_ns()
+      end)
+    end,
+  })
+
   setmetatable(this, self)
 
   return this
@@ -434,7 +448,46 @@ function Buffer:show()
   end
 
   self.win_handle = win
+  self:apply_hl_ns(win)
   return win
+end
+
+---Override a few theme groups for this buffer's window only: folds are drawn
+---without a background, and the cursor/sign columns resolve to neogit's own
+---groups. Window-scoped, so it has to be undone when the buffer leaves the
+---window -- see release_hl_ns.
+---@param win number
+function Buffer:apply_hl_ns(win)
+  local hl_ns = self:create_namespace("Highlights")
+  api.nvim_win_set_hl_ns(win, hl_ns)
+  self.hl_ns_win = win
+  api.nvim_set_hl(hl_ns, "Folded", { bg = "NONE", fg = "NONE" })
+  api.nvim_set_hl(hl_ns, "FoldedNC", { bg = "NONE", fg = "NONE" })
+  api.nvim_set_hl(hl_ns, "FoldColumn", { link = "NeogitFoldColumn" })
+  api.nvim_set_hl(hl_ns, "SignColumn", { link = "NeogitSignColumn" })
+  api.nvim_set_hl(hl_ns, "Normal", { link = "NeogitNormal" })
+  api.nvim_set_hl(hl_ns, "NormalFloat", { link = "NeogitNormalFloat" })
+  api.nvim_set_hl(hl_ns, "FloatBorder", { link = "NeogitFloatBorder" })
+  api.nvim_set_hl(hl_ns, "WinSeparator", { link = "NeogitWinSeparator" })
+  api.nvim_set_hl(hl_ns, "CursorLineNr", { link = "NeogitCursorLineNr" })
+  api.nvim_set_hl(hl_ns, "CursorLine", { link = "NeogitCursorLine" })
+end
+
+---Detach this buffer's highlight namespace from any window that no longer
+---shows it, so the next buffer in that window is painted with the theme again.
+---Only windows carrying *this* namespace are touched: by the time this runs a
+---window may already display another neogit view with a namespace of its own.
+function Buffer:release_hl_ns()
+  local hl_ns = self:get_namespace_id("Highlights")
+  if not hl_ns then
+    return
+  end
+
+  for _, win in ipairs(api.nvim_list_wins()) do
+    if api.nvim_win_get_buf(win) ~= self.handle and api.nvim_get_hl_ns { winid = win } == hl_ns then
+      pcall(api.nvim_win_set_hl_ns, win, -1)
+    end
+  end
 end
 
 function Buffer:is_valid()
@@ -842,18 +895,7 @@ function Buffer.create(config)
       vim.opt_local.fillchars:append("fold: ")
     end)
 
-    local hl_ns = buffer:create_namespace("Highlights")
-    vim.api.nvim_win_set_hl_ns(buffer.win_handle, hl_ns)
-    vim.api.nvim_set_hl(hl_ns, "Folded", { bg = "NONE", fg = "NONE" })
-    vim.api.nvim_set_hl(hl_ns, "FoldedNC", { bg = "NONE", fg = "NONE" })
-    vim.api.nvim_set_hl(hl_ns, "FoldColumn", { link = "NeogitFoldColumn" })
-    vim.api.nvim_set_hl(hl_ns, "SignColumn", { link = "NeogitSignColumn" })
-    vim.api.nvim_set_hl(hl_ns, "Normal", { link = "NeogitNormal" })
-    vim.api.nvim_set_hl(hl_ns, "NormalFloat", { link = "NeogitNormalFloat" })
-    vim.api.nvim_set_hl(hl_ns, "FloatBorder", { link = "NeogitFloatBorder" })
-    vim.api.nvim_set_hl(hl_ns, "WinSeparator", { link = "NeogitWinSeparator" })
-    vim.api.nvim_set_hl(hl_ns, "CursorLineNr", { link = "NeogitCursorLineNr" })
-    vim.api.nvim_set_hl(hl_ns, "CursorLine", { link = "NeogitCursorLine" })
+    buffer:apply_hl_ns(buffer.win_handle)
 
     if (config.disable_line_numbers == nil) or config.disable_line_numbers then
       buffer:set_window_option("number", false)

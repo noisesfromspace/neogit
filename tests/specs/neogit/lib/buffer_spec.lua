@@ -103,3 +103,61 @@ describe("buffer decorations", function()
     eq(0, #extmarks("Test"))
   end)
 end)
+
+describe("window highlight namespace", function()
+  local original_window
+
+  before_each(function()
+    original_window = vim.api.nvim_get_current_win()
+  end)
+
+  after_each(function()
+    if original_window and vim.api.nvim_win_is_valid(original_window) then
+      vim.api.nvim_set_current_win(original_window)
+    end
+  end)
+
+  local function hl_ns(win)
+    return vim.api.nvim_get_hl_ns { winid = win }
+  end
+
+  it("is applied to the window the buffer is shown in", function()
+    local buffer = Buffer.create { name = "NeogitHlNsApplyTest", kind = "split", bufhidden = "wipe" }
+
+    eq(buffer:get_namespace_id("Highlights"), hl_ns(buffer.win_handle))
+  end)
+
+  it("is detached from a window that shows another buffer", function()
+    local buffer = Buffer.create { name = "NeogitHlNsLeaveTest", kind = "split", bufhidden = "hide" }
+    local ns = buffer:get_namespace_id("Highlights")
+    eq(ns, hl_ns(buffer.win_handle))
+
+    local other = vim.api.nvim_create_buf(false, true)
+    vim.api.nvim_buf_set_lines(other, 0, -1, false, { "not neogit" })
+    vim.api.nvim_win_set_buf(buffer.win_handle, other)
+
+    -- the reset is deferred, because the window still shows the buffer while
+    -- BufWinLeave runs
+    vim.wait(100, function()
+      return hl_ns(buffer.win_handle) == -1
+    end)
+
+    eq(-1, hl_ns(buffer.win_handle))
+    vim.api.nvim_buf_delete(other, { force = true })
+  end)
+
+  it("leaves a window that already carries another namespace alone", function()
+    local buffer = Buffer.create { name = "NeogitHlNsGuardTest", kind = "split", bufhidden = "hide" }
+    local win = buffer.win_handle
+
+    local other = vim.api.nvim_create_buf(false, true)
+    vim.api.nvim_win_set_buf(win, other)
+    local foreign = vim.api.nvim_create_namespace("neogit-test-foreign")
+    vim.api.nvim_win_set_hl_ns(win, foreign)
+
+    buffer:release_hl_ns()
+
+    eq(foreign, hl_ns(win))
+    vim.api.nvim_buf_delete(other, { force = true })
+  end)
+end)
