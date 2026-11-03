@@ -1228,10 +1228,8 @@ M.n_stage = function(self)
       end
 
       if selection.item and git.status.is_unmerged(selection.item.mode) then
-        local diff_viewer = config.get_diff_viewer()
-        if diff_viewer and git.merge.is_conflicted(selection.item.name) then
-          local integration = diff_viewer == "codediff" and require("neogit.integrations.codediff")
-            or require("neogit.integrations.diffview")
+        local integration = config.get_diff_integration()
+        if integration and git.merge.is_conflicted(selection.item.name) then
           integration.open("conflict", selection.item.name, {
             on_close = {
               handle = self.buffer.handle,
@@ -1272,10 +1270,8 @@ M.n_stage = function(self)
         self:dispatch_refresh({ update_diffs = { "untracked:*" } }, "n_stage")
       elseif section.options.section == "unstaged" then
         if git.status.any_unmerged() then
-          local diff_viewer = config.get_diff_viewer()
-          if diff_viewer then
-            local integration = diff_viewer == "codediff" and require("neogit.integrations.codediff")
-              or require("neogit.integrations.diffview")
+          local integration = config.get_diff_integration()
+          if integration then
             integration.open("conflict", nil, {
               on_close = {
                 handle = self.buffer.handle,

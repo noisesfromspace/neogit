@@ -33,7 +33,7 @@ Here's an example spec for [Lazy](https://github.com/folke/lazy.nvim), but you'r
   lazy = true,
   dependencies = {
     -- Only one of these is needed.
-    "sindrets/diffview.nvim",        -- optional
+    "CoreyKaylor/diffbandit.nvim",   -- optional
     "esmuellert/codediff.nvim",      -- optional
 
     -- For a custom log pager
@@ -328,11 +328,11 @@ neogit.setup {
     -- If enabled, use telescope for menu selection rather than vim.ui.select.
     -- Allows multi-select and some things that vim.ui.select doesn't.
     telescope = nil,
-    -- Neogit only provides inline diffs. If you want a more traditional way to look at diffs, you can use `diffview`.
-    -- The diffview integration enables the diff popup.
+    -- Neogit only provides inline diffs. If you want a more traditional way to look at diffs, you can use `diffbandit`.
+    -- The diffbandit integration enables the diff popup.
     --
-    -- Requires you to have `sindrets/diffview.nvim` installed.
-    diffview = nil,
+    -- Requires you to have `CoreyKaylor/diffbandit.nvim` installed.
+    diffbandit = nil,
 
     -- Alternative diff viewer integration.
     -- Requires you to have `esmuellert/codediff.nvim` installed.
@@ -353,8 +353,8 @@ neogit.setup {
     -- Requires you to have `folke/snacks.nvim` installed.
     snacks = nil,
   },
-  -- Which diff viewer to use. nil = auto-detect (tries diffview first, then codediff).
-  -- Can be "diffview" or "codediff".
+  -- Which diff viewer to use. nil = auto-detect (tries diffbandit first, then codediff).
+  -- Can be "diffbandit" or "codediff".
   diff_viewer = nil,
   sections = {
     -- Reverting/Cherry Picking

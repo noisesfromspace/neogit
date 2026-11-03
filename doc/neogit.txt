@@ -293,11 +293,11 @@ to Neovim users.
         -- If enabled, use telescope for menu selection rather than vim.ui.select.
         -- Allows multi-select and some things that vim.ui.select doesn't.
         telescope = nil,
-        -- Neogit only provides inline diffs. If you want a more traditional way to look at diffs, you can use `diffview`.
-        -- The diffview integration enables the diff popup.
+        -- Neogit only provides inline diffs. If you want a more traditional way to look at diffs, you can use `diffbandit`.
+        -- The diffbandit integration enables the diff popup.
         --
-        -- Requires you to have `sindrets/diffview.nvim` installed.
-        diffview = nil,
+        -- Requires you to have `CoreyKaylor/diffbandit.nvim` installed.
+        diffbandit = nil,
 
         -- Alternative diff viewer integration.
         -- Requires you to have `esmuellert/codediff.nvim` installed.
@@ -318,8 +318,8 @@ to Neovim users.
         -- Requires you to have `folke/snacks.nvim` installed.
         snacks = nil,
     },
-    -- Which diff viewer to use. nil = auto-detect (tries diffview first, then codediff).
-    -- Can be "diffview" or "codediff".
+    -- Which diff viewer to use. nil = auto-detect (tries diffbandit first, then codediff).
+    -- Can be "diffbandit" or "codediff".
     diff_viewer = nil,
     sections = {
         -- Reverting/Cherry Picking
@@ -1481,7 +1481,7 @@ ref range.
 
 For these actions to become available, Neogit needs to have a diff viewer
 integration enabled. Supported viewers are:
-- `diffview.nvim`: https://github.com/sindrets/diffview.nvim
+- `diffbandit.nvim`: https://github.com/CoreyKaylor/diffbandit.nvim
 - `codediff.nvim`: https://github.com/esmuellert/codediff.nvim
 
 By default, Neogit will auto-detect which viewer is available. You can

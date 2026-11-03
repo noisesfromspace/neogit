@@ -395,8 +395,8 @@ end
 ---@field preview_buffer? NeogitConfigPopup Preview options
 ---@field popup? NeogitConfigPopup Set the default way of opening popups
 ---@field signs? NeogitConfigSigns Signs used for toggled regions
----@field integrations? { diffview: boolean, codediff: boolean, telescope: boolean, fzf_lua: boolean, mini_pick: boolean, snacks: boolean } Which integrations to enable
----@field diff_viewer? "diffview"|"codediff"|nil Which diff viewer to use (nil = auto-detect)
+---@field integrations? { diffbandit: boolean, codediff: boolean, telescope: boolean, fzf_lua: boolean, mini_pick: boolean, snacks: boolean } Which integrations to enable
+---@field diff_viewer? "diffbandit"|"codediff"|nil Which diff viewer to use (nil = auto-detect)
 ---@field sections? NeogitConfigSections
 ---@field ignored_settings? string[] Settings to never persist, format: "Filetype--cli-value", i.e. "NeogitCommitPopup--author"
 ---@field mappings? NeogitConfigMappings
@@ -557,7 +557,7 @@ function M.get_default_values()
     },
     integrations = {
       telescope = nil,
-      diffview = nil,
+      diffbandit = nil,
       codediff = nil,
       fzf_lua = nil,
       mini_pick = nil,
@@ -884,7 +884,7 @@ function M.validate_config()
       return
     end
 
-    local valid_viewers = { "diffview", "codediff" }
+    local valid_viewers = { "diffbandit", "codediff" }
     if not vim.tbl_contains(valid_viewers, config.diff_viewer) then
       err(
         "diff_viewer",
@@ -898,7 +898,7 @@ function M.validate_config()
   end
 
   local function validate_integrations()
-    local valid_integrations = { "diffview", "codediff", "telescope", "fzf_lua", "mini_pick", "snacks" }
+    local valid_integrations = { "diffbandit", "codediff", "telescope", "fzf_lua", "mini_pick", "snacks" }
     if not validate_type(config.integrations, "integrations", "table") or #config.integrations == 0 then
       return
     end
@@ -1353,7 +1353,7 @@ function M.check_integration(name)
 end
 
 ---Returns the configured diff viewer, or auto-detects if not set
----@return string|nil The diff viewer to use ("diffview", "codediff"), or nil if none available
+---@return string|nil The diff viewer to use ("diffbandit", "codediff"), or nil if none available
 function M.get_diff_viewer()
   local logger = require("neogit.logger")
   local viewer = M.values.diff_viewer
@@ -1368,13 +1368,25 @@ function M.get_diff_viewer()
     end
   end
 
-  -- Auto-detect: try diffview first (backwards compatible), then codediff
-  if M.check_integration("diffview") then
-    return "diffview"
+  -- Auto-detect: try diffbandit first, then codediff
+  if M.check_integration("diffbandit") then
+    return "diffbandit"
   elseif M.check_integration("codediff") then
     return "codediff"
   end
 
+  return nil
+end
+
+---Returns the integration module for the configured diff viewer, or nil if none is available
+---@return table|nil
+function M.get_diff_integration()
+  local viewer = M.get_diff_viewer()
+  if viewer == "diffbandit" then
+    return require("neogit.integrations.diffbandit")
+  elseif viewer == "codediff" then
+    return require("neogit.integrations.codediff")
+  end
   return nil
 end
 

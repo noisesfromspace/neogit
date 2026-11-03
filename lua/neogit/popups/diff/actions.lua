@@ -3,12 +3,7 @@ local config = require("neogit.config")
 local FuzzyFinderBuffer = require("neogit.buffers.fuzzy_finder")
 
 local function get_diff_integration()
-  local viewer = config.get_diff_viewer()
-  if viewer == "codediff" then
-    return require("neogit.integrations.codediff")
-  else
-    return require("neogit.integrations.diffview")
-  end
+  return config.get_diff_integration()
 end
 local util = require("neogit.lib.util")
 local git = require("neogit.lib.git")
